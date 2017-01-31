@@ -12,4 +12,7 @@
 
 (def column-width (- (/ line-length number-of-columns) border-size))
 
+;; ,(loop [v [] s "hello my baby, hello my darling, hello my 
+   ;;                           ragtime gal"] (if (< (count s) 14) (conj v s) (recur 
+     ;;                                                                                                    (conj v (subs s 0 14)) (subs s 14))))
 
