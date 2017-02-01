@@ -57,13 +57,25 @@
 ;; post-condition: a positive integer
 (defn line-width [words] (+ (character-count words) (- (count words) 1)))
 
+(defrecord Accumulator [in-progress accumulated])
 ;; columnnate
 ;; takes an unpacked paragraph and returns a list of strings with the length
 ;; that approaches but does not exceed column-width.
 ;; word integrity retained.
 ;; pre-condition: a list of strings representing words
 ;; postcondition: a list of strings representing column of words
-;; (defn columnnate [unformatted-paragraph column-width accumulator]
+(defn columnnate [unformatted-paragraph column-width]
+  (loop [accum Accumulator u-p unformatted-paragraph]
+    (let [[head rest] u-p]
+      (if (empty? u-p)
+        accum
+        (if (> 15 (+ (count (:in-progress accum)) (count head)))
+         nil 
+         nil))))) 
+    
+
+      
+  
 ;;    (if (empty? unformatted-paragraph)
 ;;      accumulator
 ;;      (let [[head rest] unformatted-paragraph]
