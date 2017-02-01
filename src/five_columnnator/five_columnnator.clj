@@ -112,5 +112,5 @@
 (defn hyphy [superlong c-width] 
   (loop [v [] s superlong] 
     (if (hyphy-length-test s c-width) 
-      (conj v s) 
+      (->Accumulator s v) 
       (recur (conj v (str (subs s 0 14) "-")) (subs s 14)))))
