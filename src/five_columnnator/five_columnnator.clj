@@ -65,13 +65,18 @@
 ;; pre-condition: a list of strings representing words
 ;; postcondition: a list of strings representing column of words
 (defn columnnate [unformatted-paragraph column-width]
-  (loop [accum Accumulator u-p unformatted-paragraph]
-    (let [[head rest] u-p]
-      (if (empty? u-p)
-        accum
+  (loop [accum (Accumulator. nil []) u-p unformatted-paragraph]
+    (let [[head & rest] u-p]
+      (if (empty? head)
+        (->Accumulator nil (conj (:accumulated accum) (:in-progress accum)))
         (if (> 15 (+ (count (:in-progress accum)) (count head)))
-         nil 
-         nil))))) 
+          (recur (->Accumulator 
+                   (str (str (:in-progress accum) '" ") head) 
+                   (:accumulated accum)) 
+                 rest)
+          (recur (->Accumulator 
+                   head (conj (:accumulated accum) (:in-progress accum)))
+                   rest))))))
     
 
       
