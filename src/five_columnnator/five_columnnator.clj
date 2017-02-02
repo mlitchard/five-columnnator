@@ -1,6 +1,8 @@
 (ns five-columnnator.five-columnnator 
  (:require [tupelo.core :as t])
- (:require [clojure.string :as s]))
+ (:require [clojure.string :as s])
+ (:require [five-columnnator.constants :as c]))
+ 
 
 ;; module: file-columnnator
 ;; Takes a set of five essays and re-formats each essay to be in
@@ -58,6 +60,21 @@
 (defn line-width [words] (+ (character-count words) (- (count words) 1)))
 
 (defrecord Accumulator [in-progress accumulated])
+
+(defn hyphy-length-test [s] (< (count s) c/column-width))
+
+;; hyphinator
+;; takes words longer than column-width and returns the same 
+;; word vectorized and hyphenated
+(defn hyphy [word] 
+  (loop [v [] s word] 
+    (if (hyphy-length-test s) 
+      (->Accumulator s v) 
+       (recur (conj v (str (subs s 0 14) "-")) (subs s 14)))))
+
+(defn pad-string [word-string] 
+  (format (str "%-" c/column-width "s") word-string))
+
 ;; columnnate
 ;; takes an unpacked paragraph and returns a list of strings with the length
 ;; that approaches but does not exceed column-width.
@@ -65,31 +82,24 @@
 ;; pre-condition: a list of strings representing words
 ;; postcondition: a list of strings representing column of words
 (defn columnnate [unformatted-paragraph column-width]
-  (loop [accum (Accumulator. nil []) u-p unformatted-paragraph]
-    (let [[head & rest] u-p]
-      (if (empty? head)
-        (->Accumulator nil (conj (:accumulated accum) (:in-progress accum)))
-        (if (> 15 (+ (count (:in-progress accum)) (count head)))
-          (recur (->Accumulator 
-                   (str (str (:in-progress accum) '" ") head) 
-                   (:accumulated accum)) 
-                 rest)
-          (recur (->Accumulator 
-                   head (conj (:accumulated accum) (:in-progress accum)))
-                   rest))))))
-    
-
-      
-  
-;;    (if (empty? unformatted-paragraph)
-;;      accumulator
-;;      (let [[head rest] unformatted-paragraph]
-;;        (if (empty? accumulator)
-;;           (recur rest column-width  
-;;        (def proposed-add (add-word ))
-;;        (if (> 15 (line-width proposed-add)) 
-;;         recur)))
-
+  (let [[first-word & unformatted-remainder] unformatted-paragraph]
+    (loop [accum (Accumulator. first-word []) u-p unformatted-remainder]
+      (let [[head & rest] u-p]
+        (if (empty? head)
+          (conj (:accumulated accum) (:in-progress accum))
+          (if (> 15 (+ (count (:in-progress accum)) (count head)))
+            (let [update-string (str (str (:in-progress accum) '" ") head)
+                  accumulated   (:accumulated accum)
+                  accumulator   (->Accumulator update-string accumulated)]
+              (recur accumulator rest))
+            (let [from-hyphy (hyphy head)
+                  in-progress (:in-progress from-hyphy)
+                  hyphenated  (:accumulated from-hyphy)
+                  padded      (pad-string (:in-progress accum))
+                  promoted    (conj (:accumulated accum) padded)
+                  accum'      (into promoted hyphenated)]
+              (recur (->Accumulator in-progress accum') rest))))))))
+                
 ;; collate
 ;; takes a ?list? of column-formatted essays
 ;; and re-orders them such that each nth line of each essay
@@ -109,13 +119,6 @@
 ;; postcondition: collated essays with border characters
 (defn borderizer [collated] "borderizer undefined")
 
-(defn hyphy-length-test [s c-width] (< (count s) (- c-width 1)))
 
-;; hyphinator
-;; takes words longer than column-width and returns the same 
-;; word vectorized and hyphenated
-(defn hyphy [superlong c-width] 
-  (loop [v [] s superlong] 
-    (if (hyphy-length-test s c-width) 
-      (->Accumulator s v) 
-      (recur (conj v (str (subs s 0 14) "-")) (subs s 14)))))
+
+
