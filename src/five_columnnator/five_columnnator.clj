@@ -16,8 +16,7 @@
 (defn partition-file
   [file]
   "partition-file groups strings by non-emptiness"
-  (remove #(= '("") %) ;; figure out proper application of t/split-when
-          (partition-by #(= "" %) file)))
+  (into [] (map (partial into []) (remove #(= '("") %) (partition-by #(= "" %) file)))))
 
 ;; words
 ;; takes a single string of words and returns a vector of words
@@ -31,6 +30,9 @@
 ;; postcondition: list of strings representing a word
 (defn unpack-paragraph [paragraph] (flatten (map words paragraph)))
 
+(defn unpack-paragraphs [file] (into [] (map ( unpack-paragraph file))
+
+(defn unpack-files [files] (into [] (map unpack-paragraphs files)
 ;; word-count
 ;; counts the words in a vector
 ;; pre-condition - a vector of words (TODO: tagging)
@@ -81,7 +83,7 @@
 ;; word integrity retained.
 ;; pre-condition: a list of strings representing words
 ;; postcondition: a list of strings representing column of words
-(defn columnnate [unformatted-paragraph column-width]
+(defn columnnate-paragraph [column-width unformatted-paragraph]
   (let [[first-word & unformatted-remainder] unformatted-paragraph]
     (loop [accum (Accumulator. first-word []) u-p unformatted-remainder]
       (let [[head & rest] u-p]
@@ -99,7 +101,14 @@
                   promoted    (conj (:accumulated accum) padded)
                   accum'      (into promoted hyphenated)]
               (recur (->Accumulator in-progress accum') rest))))))))
-                
+
+(defn columnnate-file [column-width unformatted-file] 
+  (map (partial columnnate-paragraph column-width) unformatted-file))
+;;    (fn [paragraph] columnnate-paragraph column-width paragraph)
+;;    unformatted-file))
+
+(defn collate-row [row1 row2] (into [] (vector row1 row2)))
+
 ;; collate
 ;; takes a ?list? of column-formatted essays
 ;; and re-orders them such that each nth line of each essay
@@ -109,16 +118,21 @@
 ;; and so on
 ;; pre-condition: a list of column-formatted essays
 ;; postcondition: a list of line-grouped ?lists?
-(defn collate [essay1 essay2 essay3 essay4 essay5]
-     "collate undefined")
+(defn collate [essay1 & rest]
+  (into [] 
+        (apply map (fn [str1 & rest'] 
+                     (into [] (apply vector str1 rest'))) essay1 rest)))
+    
 
+(def p_into (partial into []))
 ;; borderizer
 ;; takes collated essays and places border character between lines on the same
 ;; row
 ;; pre-condition: collated essays --implementation to be determined
 ;; postcondition: collated essays with border characters
-(defn borderizer [collated] "borderizer undefined")
+(defn borderizer [collated] (into [] (map (comp p_into (partial interpose " ")) collated)))
 
 
 
-
+(defn rowified [borderized'] 
+  (into [] (map (fn [row] (conj row "\n")) borderized')))

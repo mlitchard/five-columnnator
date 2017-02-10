@@ -6,4 +6,4 @@
 
 (defn get-file [file-name] (line-seq (clojure.java.io/reader file-name)))
 
-(defn get-files [f-names] (map get-file f-names))
+(defn get-files [filenames] (into [] (map (partial into []) (map get-file filenames))))
