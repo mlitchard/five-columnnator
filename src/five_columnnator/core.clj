@@ -13,7 +13,16 @@
 ;; expects list of five strings representing filenames
 
 (defn five-columnator [filenames]
-  (into [] (map bordered-rows (into [] (map (partial columnnate-file column-width) (into [] (map unpack-paragraphs (into [] (map partition-file (into [] (map get-file filenames)))))))))))
+  (into [] 
+        (map bordered-rows 
+             (into [] 
+                   (map (partial columnnate-file column-width) 
+                        (into [] 
+                              (map unpack-paragraphs 
+                                   (into [] 
+                                         (map partition-file 
+                                              (into [] 
+                                                    (map get-file filenames)))))))))))
 ;; (defn five-columnator [ filenames]
 ;;  (into [] (map (partial columnnate-file column-width) (map unpack-paragraphs (partition-file (get-files filenames))))))
 ;;
