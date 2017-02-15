@@ -28,11 +28,11 @@
 ;; takes paragraph and returns same paragraph as list of words
 ;; pre-condition: list of strings representing a sentence
 ;; postcondition: list of strings representing a word
-(defn unpack-paragraph [paragraph] (flatten (map words paragraph)))
+(defn unpack-paragraph [paragraph] (into [] (flatten (map words paragraph))))
 
-(defn unpack-paragraphs [file] (into [] (map ( unpack-paragraph file))
+(defn unpack-paragraphs [file] (into [] (map unpack-paragraph file)))
 
-(defn unpack-files [files] (into [] (map unpack-paragraphs files)
+(defn unpack-files [files] (into [] (map unpack-paragraphs files)))
 ;; word-count
 ;; counts the words in a vector
 ;; pre-condition - a vector of words (TODO: tagging)
@@ -103,7 +103,7 @@
               (recur (->Accumulator in-progress accum') rest))))))))
 
 (defn columnnate-file [column-width unformatted-file] 
-  (map (partial columnnate-paragraph column-width) unformatted-file))
+  (into [] (map (partial columnnate-paragraph column-width) unformatted-file)))
 ;;    (fn [paragraph] columnnate-paragraph column-width paragraph)
 ;;    unformatted-file))
 
@@ -136,3 +136,6 @@
 
 (defn rowified [borderized'] 
   (into [] (map (fn [row] (conj row "\n")) borderized')))
+
+(defn test_comp_f [text] (map (comp rowified borderizer)) text)
+(defn bordered-rows [text] (map (comp rowified borderizer)) text)
