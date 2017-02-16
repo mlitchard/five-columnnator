@@ -8,6 +8,22 @@
 ;; Takes a set of five essays and re-formats each essay to be in
 ;; it's corresponding column. For example - essay 1 would be formatted to
 ;; be in column 1, essay 5 in column 5.
+(defrecord File [order-recieved row-count file])
+
+(defn label-file 
+  [file-rows order]
+    (def row-count (reduce + (mapv count file-rows)))
+    (File. order row-count file-rows))
+
+;; label-files
+(defn label-files 
+  [files] 
+  (map label-file files (take (count files) (drop 1 (range)))))
+
+;; sort-by-row-count
+(defn sort-by-row-count [labelled-files]
+  (sort #(> (:row-count %1) (:row-count %2))))
+
 
 ;; partition-file
 ;; partitions essay into easily-mungable paragraphs
